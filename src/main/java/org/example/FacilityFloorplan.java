@@ -4,9 +4,10 @@ package org.example;
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class FacilityFloorplan extends Thread{
 
+    final int numberOfStations = 4;
+
+
 
     public static void main(String[] args) {
-
-
     }
 }
