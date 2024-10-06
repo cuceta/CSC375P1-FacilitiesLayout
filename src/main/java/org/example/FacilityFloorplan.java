@@ -148,50 +148,6 @@ public class FacilityFloorplan extends Thread {
             stationIDCounter++;
         }
 
-
-        //2x2 stations
-        stationFunction = "Big";
-        for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
-            Station s = new Station(stationFunction, stationScale * 2, stationScale * 2, stationIDCounter);
-            s.setFunction(stationFunction);
-            s.setId(stationIDCounter);
-            s.setHeight(stationScale * 2);
-            s.setWidth(stationScale * 2);
-//            setXYCoordinates(s, stationsArray, stationIDCounter);
-
-            while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
-                int randomXInt = ThreadLocalRandom.current().nextInt(1, 17);
-                int randomYInt = ThreadLocalRandom.current().nextInt(1, 17);
-                if (stationIDCounter == 0) {
-                    s.setxCoordinate(stationScale * randomXInt);
-                    s.setyCoordinate(stationScale * randomYInt);
-                } else {
-                    for (int p = 0; p < stationIDCounter; p++) {
-
-                        if (    ((stationScale *( randomXInt+1 )) <= (stationScale * 16)) &&
-                                ((stationScale * ( randomYInt+1 )) <= (stationScale * 16)) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1)))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1)))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
-                                ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1))))
-                        ) {
-                            s.setxCoordinate(stationScale * randomXInt);
-                            s.setyCoordinate(stationScale * randomYInt);
-                        }
-
-                    }
-                }
-            }
-
-            stationsArray[stationIDCounter] = s;
-            stationIDCounter++;
-        }
-
         //2x1 stations
         stationFunction = "Wide";
         for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
@@ -256,6 +212,49 @@ public class FacilityFloorplan extends Thread {
             }
             stationsArray[stationIDCounter] = s;
 
+            stationIDCounter++;
+        }
+
+        //2x2 stations
+        stationFunction = "Big";
+        for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
+            Station s = new Station(stationFunction, stationScale * 2, stationScale * 2, stationIDCounter);
+            s.setFunction(stationFunction);
+            s.setId(stationIDCounter);
+            s.setHeight(stationScale * 2);
+            s.setWidth(stationScale * 2);
+//            setXYCoordinates(s, stationsArray, stationIDCounter);
+
+            while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
+                int randomXInt = ThreadLocalRandom.current().nextInt(1, 17);
+                int randomYInt = ThreadLocalRandom.current().nextInt(1, 17);
+                if (stationIDCounter == 0) {
+                    s.setxCoordinate(stationScale * randomXInt);
+                    s.setyCoordinate(stationScale * randomYInt);
+                } else {
+                    for (int p = 0; p < stationIDCounter; p++) {
+
+                            if (    ((stationScale *( randomXInt+1 )) <= (stationScale * 16)) &&
+                                    ((stationScale * ( randomYInt+1 )) <= (stationScale * 16)) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * randomXInt)) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1)))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt + 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1)))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * randomYInt))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt + 1)))) &&
+                                    ((stationsArray[p].getxCoordinate() != (stationScale * (randomXInt - 1))) && (stationsArray[p].getyCoordinate() != (stationScale * (randomYInt - 1))))
+                            ) {
+                                s.setxCoordinate(stationScale * randomXInt);
+                                s.setyCoordinate(stationScale * randomYInt);
+                            }
+
+                    }
+                }
+            }
+
+            stationsArray[stationIDCounter] = s;
             stationIDCounter++;
         }
 

@@ -22,11 +22,29 @@ public class Graphplay extends JPanel {
         }
 
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(Color.BLUE);
+//        g2.setColor(Color.BLUE);
+//
+//        g2.fillRect(gridSize, gridSize, gridSize,gridSize);
+//        g2.setColor(Color.PINK);
+//        g2.fillRect(gridSize,gridSize,gridSize,gridSize*16);
+        Station[] stations = FacilityFloorplan.createFloorplan();
+        for ( Station s : stations){
+            if (s.getFunction().equals("Small")){
+                g2.setColor(Color.CYAN);
+            } else if (s.getFunction().equals("Big")) {
+                g2.setColor(Color.RED);
+            } else if (s.getFunction().equals("Long")) {
+                g2.setColor(Color.orange);
+            } else if (s.getFunction().equals("Wide")) {
+                g2.setColor(Color.pink);
+            }
+//            g2.fillRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
+//            g2.setColor(Color.BLACK);
+            g2.setStroke(new BasicStroke(4));
+            g2.drawRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
 
-        g2.fillRect(gridSize, gridSize, gridSize,gridSize);
-        g2.setColor(Color.PINK);
-        g2.fillRect(gridSize,gridSize,gridSize,gridSize*16);
+        }
+
     }
 
     public static void main(String[] args) {
