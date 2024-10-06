@@ -26,7 +26,7 @@ public class Graphplay extends JPanel {
 
         g2.fillRect(gridSize, gridSize, gridSize,gridSize);
         g2.setColor(Color.PINK);
-        g2.fillRect(gridSize*2,gridSize,gridSize*2,gridSize);
+        g2.fillRect(gridSize,gridSize,gridSize,gridSize*16);
     }
 
     public static void main(String[] args) {
