@@ -9,7 +9,7 @@ public class Graphplay extends JPanel {
 
         int width = 800;
         int height = 800;
-        int gridSize = 50; // Adjust this for grid spacing
+        int gridSize = 25; // Adjust this for grid spacing
 
         // Draw horizontal lines
         for (int y = gridSize; y <= height+gridSize; y += gridSize) {
@@ -36,7 +36,7 @@ public class Graphplay extends JPanel {
             } else if (s.getFunction().equals("Long")) {
                 g2.setColor(Color.orange);
             } else if (s.getFunction().equals("Wide")) {
-                g2.setColor(Color.pink);
+                g2.setColor(Color.MAGENTA);
             }
 //            g2.fillRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
 //            g2.setColor(Color.BLACK);
