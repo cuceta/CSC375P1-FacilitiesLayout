@@ -38,8 +38,8 @@ public class Graphplay extends JPanel {
             } else if (s.getFunction().equals("Wide")) {
                 g2.setColor(Color.MAGENTA);
             }
-//            g2.fillRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
-//            g2.setColor(Color.BLACK);
+            g2.fillRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
+            g2.setColor(Color.BLACK);
             g2.setStroke(new BasicStroke(4));
             g2.drawRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
 

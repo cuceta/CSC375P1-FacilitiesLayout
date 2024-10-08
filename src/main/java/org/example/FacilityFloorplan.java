@@ -10,6 +10,7 @@ public class FacilityFloorplan extends Thread {
     static final int numberOfStations = 48;//Always a multiple of 4
     static final int typesOfStations = 4;
     static int stationScale = 25;  //Spacing on the grid
+    static int gridSize = 32;
     private static final ThreadLocal<Station[]> stations = new ThreadLocal<>(); //Array of stations
 
 
@@ -65,13 +66,13 @@ public class FacilityFloorplan extends Thread {
     }
     public static void setXYCoordinates(Station s, Station[] stationsArray, int stationIDCounter) {
         while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
-            int randomXInt = ThreadLocalRandom.current().nextInt(1, 33);
-            int randomYInt = ThreadLocalRandom.current().nextInt(1, 33);
+            int randomXInt = ThreadLocalRandom.current().nextInt(1, (gridSize + 1));
+            int randomYInt = ThreadLocalRandom.current().nextInt(1, (gridSize+1));
             int tryX = randomXInt * stationScale;
             int tryY = randomYInt * stationScale;
 
             // Ensure the station doesn't go beyond the grid's edge
-            if ((tryX < (stationScale * 32)) && (tryY < (stationScale * 32))) {
+            if ((tryX < (stationScale * gridSize)) && (tryY < (stationScale * gridSize))) {
                 // If no overlap, set coordinates
                 if (!isOverlapping(tryX, tryY, s.getWidth(), s.getHeight(), stationsArray, stationIDCounter)) {
                     s.setxCoordinate(tryX);
