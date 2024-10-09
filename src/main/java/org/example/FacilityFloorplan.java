@@ -82,10 +82,37 @@ public class FacilityFloorplan extends Thread {
         }
     }
 
-    /**
-     * Method to check if a station at (x, y) with given width and height overlaps with existing stations.
-     * Includes a 1-unit radius around the station.
-     */
+    public static double calculateFPAffinity (Station[] stations ){
+        double totalFPAffinity = 0;
+        for (Station s :  stations){
+            totalFPAffinity += stationAffinity(s, stations);
+        }
+        return totalFPAffinity;
+    }
+
+    public static double stationAffinity(Station s, Station[] stations){
+        double totalIndividualAffinity = 0;
+        //go through the array and calculate the affinity of the station s to the other stations in the array.
+        int sX = s.getxCoordinate();
+        int sY = s.getyCoordinate();
+        int otherX;
+        int otherY;
+        for (Station otherStation : stations){
+            otherX = otherStation.getxCoordinate();
+            otherY = otherStation.getyCoordinate();
+            double affinityResult;
+            double xSquaredDifference = Math.pow((sX - otherX), 2);
+            double ySquaredDifference = Math.pow((sY - otherY), 2);
+            /*
+            TO DO
+
+            calculate square root of ( square(sX - otherX) + square(xY - otherY) )
+             */
+
+            totalIndividualAffinity += affinityResult;
+        }
+        return totalIndividualAffinity;
+    }
     public static boolean isOverlapping(int x, int y, int width, int height, Station[] stationsArray, int stationIDCounter) {
         // Calculate the bounding box for the new station, with padding (1-unit radius)
         int newXMin = x - stationScale;
