@@ -103,11 +103,8 @@ public class FacilityFloorplan extends Thread {
             double affinityResult;
             double xSquaredDifference = Math.pow((sX - otherX), 2);
             double ySquaredDifference = Math.pow((sY - otherY), 2);
-            /*
-            TO DO
-
-            calculate square root of ( square(sX - otherX) + square(xY - otherY) )
-             */
+            double sum = xSquaredDifference + ySquaredDifference;
+            affinityResult = Math.sqrt(sum);
 
             totalIndividualAffinity += affinityResult;
         }
@@ -195,5 +192,6 @@ public class FacilityFloorplan extends Thread {
                     "\nStation xCor: " + s.getxCoordinate() +
                     "\nStation yCor: " + s.getyCoordinate() + "\n");
         }
+        System.out.println(calculateFPAffinity(stations1));
     }
 }
