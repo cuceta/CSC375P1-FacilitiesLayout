@@ -11,10 +11,7 @@ public class FacilityFloorplan extends Thread {
     static final int typesOfStations = 4;
     static int stationScale = 25;  //Spacing on the grid
     static int gridSize = 32;
-    private static final ThreadLocal<Station[]> stations = new ThreadLocal<>(); //Array of stations
-
-
-    HashMap<int[][], Station> coordinatesToStations;        //
+    static HashMap<Double, Station[]> allFloorPlans;
 
 
     // ---=== STEP 1: Create  stations ===---
@@ -64,6 +61,12 @@ public class FacilityFloorplan extends Thread {
         }
         return stationsArray;
     }
+
+    /*
+    Helper methods for createFloorplan
+        Makes sure stations do not overlap when being placed into the floorplan before setting
+        their x and y coordinates
+     */
     public static void setXYCoordinates(Station s, Station[] stationsArray, int stationIDCounter) {
         while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
             int randomXInt = ThreadLocalRandom.current().nextInt(1, (gridSize + 1));
@@ -89,7 +92,10 @@ public class FacilityFloorplan extends Thread {
         }
         return totalFPAffinity;
     }
-
+    /*
+    Helper methods for the calculateFPAffinity() method
+        Calula
+     */
     public static double stationAffinity(Station s, Station[] stations){
         double totalIndividualAffinity = 0;
         //go through the array and calculate the affinity of the station s to the other stations in the array.
@@ -100,13 +106,55 @@ public class FacilityFloorplan extends Thread {
         for (Station otherStation : stations){
             otherX = otherStation.getxCoordinate();
             otherY = otherStation.getyCoordinate();
+            double distance;
+            double affinityBetweenStations;
             double affinityResult;
             double xSquaredDifference = Math.pow((sX - otherX), 2);
             double ySquaredDifference = Math.pow((sY - otherY), 2);
             double sum = xSquaredDifference + ySquaredDifference;
-            affinityResult = Math.sqrt(sum);
+            distance = Math.sqrt(sum);
+            if (s.getFunction().equals("Small")){
+                if(otherStation.getFunction().equals("Small")){
 
-            totalIndividualAffinity += affinityResult;
+                } else if (otherStation.getFunction().equals("Wide")){
+
+                } else if (otherStation.getFunction().equals("Long")){
+
+                }else if (otherStation.getFunction().equals("Big")){
+
+                }
+            } else if (s.getFunction().equals("Wide")){
+                if(otherStation.getFunction().equals("Small")){
+
+                } else if (otherStation.getFunction().equals("Wide")){
+
+                } else if (otherStation.getFunction().equals("Long")){
+
+                }else if (otherStation.getFunction().equals("Big")){
+
+                }
+            } else if (s.getFunction().equals("Long")){
+                if(otherStation.getFunction().equals("Small")){
+
+                } else if (otherStation.getFunction().equals("Wide")){
+
+                } else if (otherStation.getFunction().equals("Long")){
+
+                }else if (otherStation.getFunction().equals("Big")){
+
+                }
+            } else if (s.getFunction().equals("Big")){
+                if(otherStation.getFunction().equals("Small")){
+
+                } else if (otherStation.getFunction().equals("Wide")){
+
+                } else if (otherStation.getFunction().equals("Long")){
+
+                }else if (otherStation.getFunction().equals("Big")){
+
+                }
+            }
+
         }
         return totalIndividualAffinity;
     }
