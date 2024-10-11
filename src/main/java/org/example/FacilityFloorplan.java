@@ -106,54 +106,56 @@ public class FacilityFloorplan extends Thread {
         for (Station otherStation : stations){
             otherX = otherStation.getxCoordinate();
             otherY = otherStation.getyCoordinate();
-            double distance;
-            double affinityBetweenStations;
+            double affinityBetweenStations = 0;
             double affinityResult;
             double xSquaredDifference = Math.pow((sX - otherX), 2);
             double ySquaredDifference = Math.pow((sY - otherY), 2);
             double sum = xSquaredDifference + ySquaredDifference;
-            distance = Math.sqrt(sum);
+            double distance = Math.sqrt(sum);
+            //determine the affinity between the two stations
             if (s.getFunction().equals("Small")){
                 if(otherStation.getFunction().equals("Small")){
-
+                    affinityBetweenStations = 10.0;
                 } else if (otherStation.getFunction().equals("Wide")){
-
+                    affinityBetweenStations = -10.0;
                 } else if (otherStation.getFunction().equals("Long")){
-
+                    affinityBetweenStations = -10.0;
                 }else if (otherStation.getFunction().equals("Big")){
-
+                    affinityBetweenStations = -10.0;
                 }
             } else if (s.getFunction().equals("Wide")){
                 if(otherStation.getFunction().equals("Small")){
-
+                    affinityBetweenStations = -10.0;
                 } else if (otherStation.getFunction().equals("Wide")){
-
+                    affinityBetweenStations = 10.0;
                 } else if (otherStation.getFunction().equals("Long")){
-
+                    affinityBetweenStations = 5.0;
                 }else if (otherStation.getFunction().equals("Big")){
-
+                    affinityBetweenStations = 10.0;
                 }
             } else if (s.getFunction().equals("Long")){
                 if(otherStation.getFunction().equals("Small")){
-
+                    affinityBetweenStations = -10.0;
                 } else if (otherStation.getFunction().equals("Wide")){
-
+                    affinityBetweenStations = 5.0;
                 } else if (otherStation.getFunction().equals("Long")){
-
+                    affinityBetweenStations = 10.0;
                 }else if (otherStation.getFunction().equals("Big")){
-
+                    affinityBetweenStations = 0.0;
                 }
             } else if (s.getFunction().equals("Big")){
                 if(otherStation.getFunction().equals("Small")){
-
+                    affinityBetweenStations = -10.0;
                 } else if (otherStation.getFunction().equals("Wide")){
-
+                    affinityBetweenStations = 10.0;
                 } else if (otherStation.getFunction().equals("Long")){
-
+                    affinityBetweenStations = 0.0;
                 }else if (otherStation.getFunction().equals("Big")){
-
+                    affinityBetweenStations = 5.0;
                 }
             }
+            affinityResult = affinityBetweenStations * distance;
+            totalIndividualAffinity += affinityResult;
 
         }
         return totalIndividualAffinity;
