@@ -1,6 +1,8 @@
 package org.example;
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+
 public class Graphplay extends JPanel {
 
     @Override
@@ -27,7 +29,8 @@ public class Graphplay extends JPanel {
 //        g2.fillRect(gridSize, gridSize, gridSize,gridSize);
 //        g2.setColor(Color.PINK);
 //        g2.fillRect(gridSize,gridSize,gridSize,gridSize*16);
-        Station[] stations = FacilityFloorplan.createFloorplan();
+        Station[] stations = FacilityFloorplan.createStations();
+        Floorplan floorplan = FacilityFloorplan.createFloorplan(stations, FacilityFloorplan.calculateFPAffinity(stations));
         for ( Station s : stations){
             if (s.getFunction().equals("Small")){
                 g2.setColor(Color.CYAN);

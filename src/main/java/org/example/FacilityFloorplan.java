@@ -1,8 +1,8 @@
 package org.example;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class FacilityFloorplan extends Thread {
@@ -11,11 +11,14 @@ public class FacilityFloorplan extends Thread {
     static final int typesOfStations = 4;
     static int stationScale = 25;  //Spacing on the grid
     static int gridSize = 32;
-    static HashMap<Double, Station[]> allFloorPlans;
+    static HashMap<Double, Floorplan> allFloorPlans = new HashMap<>();
+    final ReentrantLock lock = new ReentrantLock();
+
+
 
 
     // ---=== STEP 1: Create  stations ===---
-    public static Station[] createFloorplan() {
+    public static Station[] createStations() {
         Station[] stationsArray = new Station[numberOfStations];
         int[][] coordinates; //2D array to save the coordinate of each station
         int stationIDCounter = 0;
@@ -61,12 +64,6 @@ public class FacilityFloorplan extends Thread {
         }
         return stationsArray;
     }
-
-    /*
-    Helper methods for createFloorplan
-        Makes sure stations do not overlap when being placed into the floorplan before setting
-        their x and y coordinates
-     */
     public static void setXYCoordinates(Station s, Station[] stationsArray, int stationIDCounter) {
         while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
             int randomXInt = ThreadLocalRandom.current().nextInt(1, (gridSize + 1));
@@ -85,6 +82,40 @@ public class FacilityFloorplan extends Thread {
         }
     }
 
+    /*
+   Helper methods for createStations
+       Makes sure stations do not overlap when being placed into the floorplan before setting
+       their x and y coordinates
+    */
+    public static boolean isOverlapping(int x, int y, int width, int height, Station[] stationsArray, int stationIDCounter) {
+        // Calculate the bounding box for the new station, with padding (1-unit radius)
+        int newXMin = x - stationScale;
+        int newXMax = x + width + stationScale;
+        int newYMin = y - stationScale;
+        int newYMax = y + height + stationScale;
+
+        // Loop through all placed stations to check for overlap
+        for (int i = 0; i < stationIDCounter; i++) {
+            Station placedStation = stationsArray[i];
+
+            // Calculate the bounding box of the existing station, also with 1-unit padding
+            int placedXMin = placedStation.getxCoordinate() - stationScale;
+            int placedXMax = placedStation.getxCoordinate() + placedStation.getWidth() + stationScale;
+            int placedYMin = placedStation.getyCoordinate() - stationScale;
+            int placedYMax = placedStation.getyCoordinate() + placedStation.getHeight() + stationScale;
+
+            // Check if the bounding boxes overlap
+            boolean xOverlap = newXMax > placedXMin && newXMin < placedXMax;
+            boolean yOverlap = newYMax > placedYMin && newYMin < placedYMax;
+
+            if (xOverlap && yOverlap) {
+                return true;  // Overlap found
+            }
+        }
+
+        return false;  // No overlap
+    }
+
     public static double calculateFPAffinity (Station[] stations ){
         double totalFPAffinity = 0;
         for (Station s :  stations){
@@ -92,9 +123,10 @@ public class FacilityFloorplan extends Thread {
         }
         return totalFPAffinity;
     }
+
     /*
     Helper methods for the calculateFPAffinity() method
-        Calula
+        Calculates the affinity total from one specific stations to all the other stations in the floor plan
      */
     public static double stationAffinity(Station s, Station[] stations){
         double totalIndividualAffinity = 0;
@@ -160,35 +192,13 @@ public class FacilityFloorplan extends Thread {
         }
         return totalIndividualAffinity;
     }
-    public static boolean isOverlapping(int x, int y, int width, int height, Station[] stationsArray, int stationIDCounter) {
-        // Calculate the bounding box for the new station, with padding (1-unit radius)
-        int newXMin = x - stationScale;
-        int newXMax = x + width + stationScale;
-        int newYMin = y - stationScale;
-        int newYMax = y + height + stationScale;
 
-        // Loop through all placed stations to check for overlap
-        for (int i = 0; i < stationIDCounter; i++) {
-            Station placedStation = stationsArray[i];
-
-            // Calculate the bounding box of the existing station, also with 1-unit padding
-            int placedXMin = placedStation.getxCoordinate() - stationScale;
-            int placedXMax = placedStation.getxCoordinate() + placedStation.getWidth() + stationScale;
-            int placedYMin = placedStation.getyCoordinate() - stationScale;
-            int placedYMax = placedStation.getyCoordinate() + placedStation.getHeight() + stationScale;
-
-            // Check if the bounding boxes overlap
-            boolean xOverlap = newXMax > placedXMin && newXMin < placedXMax;
-            boolean yOverlap = newYMax > placedYMin && newYMin < placedYMax;
-
-            if (xOverlap && yOverlap) {
-                return true;  // Overlap found
-            }
-        }
-
-        return false;  // No overlap
+    public static Floorplan createFloorplan(Station[] stations, double affinity){
+        Station[] sts = createStations();
+        Floorplan floorplan = new Floorplan(sts,calculateFPAffinity(sts));
+//        allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
+        return floorplan;
     }
-
 
     // ---=== STEP 2: Create 4 threads ===---
     public static Thread threadOne = new Thread();
@@ -197,35 +207,33 @@ public class FacilityFloorplan extends Thread {
     public static Thread threadFour = new Thread();
 
 
-    // ====== OUTSIDE EACH OF EACH OF THE THREADS ======
-
-    // ---=== STEP 6: Sort global poll of solutions ===---
 
 
-//    @Override
-//    public void run() {
-//
-//        //in here Put what I want each thread to do
-//        // - Thread independent
-//
-//        // ====== INSIDE EACH OF EACH OF THE THREADS ======
-//
-//        // ---=== STEP 3: Give each thread a defensive copy of the stations ===---
-//
-//
-//        // ---=== STEP 4: Create floor plans ===---
-//
-//        // ---=== OPTION 1: Produce a floorplan with random placements of stations ===---
-//
-//        // ---=== OPTION 2.1: Copy half of an existing floor plan ===---
-//
-//        // ---=== OPTION 2.2: Create other half of the floor plan ===---
-//
-//
-//        // ---=== STEP 5: Calculate Affinity total score and add it to the global poll of solutions ===---
-//
-//        super.run();
-//    }
+
+    @Override
+    public void run() {
+
+        //in here Put what I want each thread to do
+        // - Thread independent
+
+        // ====== INSIDE EACH OF EACH OF THE THREADS ======
+
+        // ---=== STEP 3: Give each thread a defensive copy of the stations ===---
+
+
+        // ---=== STEP 4: Create floor plans ===---
+
+        // ---=== OPTION 1: Produce a floorplan with random placements of stations ===---
+
+        // ---=== OPTION 2.1: Copy half of an existing floor plan ===---
+
+        // ---=== OPTION 2.2: Create other half of the floor plan ===---
+
+
+        // ---=== STEP 5: Calculate Affinity total score and add it to the global poll of solutions ===---
+
+        super.run();
+    }
 
     public static void main(String[] args) {
         //Start threads
@@ -233,7 +241,7 @@ public class FacilityFloorplan extends Thread {
 //        threadTwo.start();
 //        threadThree.start();
 //        threadFour.start();
-        Station[] stations1 = createFloorplan();
+        Station[] stations1 = createStations();
         for (Station s : stations1){
             System.out.println("\nStation: " + s.getId() +
                     "\nStation function: " + s.getFunction() +
@@ -243,5 +251,10 @@ public class FacilityFloorplan extends Thread {
                     "\nStation yCor: " + s.getyCoordinate() + "\n");
         }
         System.out.println(calculateFPAffinity(stations1));
+        Floorplan floorplan = new Floorplan(stations1, calculateFPAffinity(stations1));
+        allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
+        System.out.println(allFloorPlans.size());
+        System.out.println(allFloorPlans.keySet());
+
     }
 }

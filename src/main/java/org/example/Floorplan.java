@@ -1,18 +1,24 @@
 package org.example;
 
 public class Floorplan {
-    private int totalAffinity;
+    private double floorPlanAffinity;
     private Station[] stations;
 
-    public Floorplan(Station[] stations) {
+    public Floorplan(Station[] stations, double floorPlanAffinity) {
+        this.floorPlanAffinity = floorPlanAffinity;
         this.stations = stations;
     }
 
-    public int getTotalAffinity() {
-        return totalAffinity;
+    public Station[] getStations() {
+        return stations;
     }
-
-    public void setTotalAffinity(int totalAffinity) {
-        this.totalAffinity = totalAffinity;
+    public double getFloorPlanAffinity() {
+        return floorPlanAffinity;
+    }
+    public void setStations(Station[] s){
+        this.stations = s;
+    }
+    public void setFloorPlanAffinity(int floorPlanAffinity) {
+        this.floorPlanAffinity = floorPlanAffinity;
     }
 }
