@@ -18,7 +18,7 @@ public class Floorplan {
     public void setStations(Station[] s){
         this.stations = s;
     }
-    public void setFloorPlanAffinity(int floorPlanAffinity) {
+    public void setFloorPlanAffinity(double floorPlanAffinity) {
         this.floorPlanAffinity = floorPlanAffinity;
     }
 }

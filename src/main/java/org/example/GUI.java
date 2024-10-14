@@ -1,12 +1,11 @@
 package org.example;
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
 
-public class Graphplay extends JPanel {
+public class GUI extends JPanel {
 
     @Override
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         int width = 800;
@@ -29,9 +28,9 @@ public class Graphplay extends JPanel {
 //        g2.fillRect(gridSize, gridSize, gridSize,gridSize);
 //        g2.setColor(Color.PINK);
 //        g2.fillRect(gridSize,gridSize,gridSize,gridSize*16);
-        Station[] stations = FacilityFloorplan.createStations();
-        Floorplan floorplan = FacilityFloorplan.createFloorplan(stations, FacilityFloorplan.calculateFPAffinity(stations));
-        for ( Station s : stations){
+//        Station[] stations = FacilityFloorplan.createStations();
+        Floorplan floorplan = FacilityFloorplan.createFloorplan();
+        for ( Station s : floorplan.getStations()){
             if (s.getFunction().equals("Small")){
                 g2.setColor(Color.CYAN);
             } else if (s.getFunction().equals("Big")) {
@@ -47,14 +46,14 @@ public class Graphplay extends JPanel {
             g2.drawRect(s.getxCoordinate(),s.getyCoordinate(), s.getWidth(), s.getHeight());
 
         }
-
+        System.out.println(floorplan.getFloorPlanAffinity());
     }
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("Facilities Layout");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1000, 900);
-        frame.add(new Graphplay());
+        frame.add(new GUI());
         frame.setVisible(true);
     }
 }
