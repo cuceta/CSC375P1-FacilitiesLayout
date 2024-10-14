@@ -16,7 +16,7 @@ public class FacilityFloorplan extends Thread {
 
     //Always lock these before using
     static HashMap<Double, Floorplan> allFloorPlans = new HashMap<>();
-    static ArrayList<Floorplan> floorPlanArray = new ArrayList<>();  //used for crossovers
+    static ArrayList<Floorplan> floorPlanArraylist = new ArrayList<>();  //used for crossovers
 
 
 
@@ -86,7 +86,7 @@ public class FacilityFloorplan extends Thread {
         }
     }
 
-    /*
+    /**
    Helper methods for createStations
        Makes sure stations do not overlap when being placed into the floorplan before setting
        their x and y coordinates
@@ -128,7 +128,7 @@ public class FacilityFloorplan extends Thread {
         return totalFPAffinity;
     }
 
-    /*
+    /**
     Helper methods for the calculateFPAffinity() method
         Calculates the affinity total from one specific stations to all the other stations in the floor plan
      */
@@ -150,45 +150,37 @@ public class FacilityFloorplan extends Thread {
             double distance = Math.sqrt(sum);
             //determine the affinity between the two stations
             if (s.getFunction().equals("Small")){
-                if(otherStation.getFunction().equals("Small")){
-                    affinityBetweenStations = 10.0;
-                } else if (otherStation.getFunction().equals("Wide")){
-                    affinityBetweenStations = -10.0;
-                } else if (otherStation.getFunction().equals("Long")){
-                    affinityBetweenStations = -10.0;
-                }else if (otherStation.getFunction().equals("Big")){
-                    affinityBetweenStations = -10.0;
-                }
+                affinityBetweenStations = switch (otherStation.getFunction()) {
+                    case "Small" -> 10.0;
+                    case "Wide" -> -10.0;
+                    case "Long" -> -10.0;
+                    case "Big" -> -10.0;
+                    default -> affinityBetweenStations;
+                };
             } else if (s.getFunction().equals("Wide")){
-                if(otherStation.getFunction().equals("Small")){
-                    affinityBetweenStations = -10.0;
-                } else if (otherStation.getFunction().equals("Wide")){
-                    affinityBetweenStations = 10.0;
-                } else if (otherStation.getFunction().equals("Long")){
-                    affinityBetweenStations = 5.0;
-                }else if (otherStation.getFunction().equals("Big")){
-                    affinityBetweenStations = 10.0;
-                }
+                affinityBetweenStations = switch (otherStation.getFunction()) {
+                    case "Small" -> -10.0;
+                    case "Wide" -> 10.0;
+                    case "Long" -> 5.0;
+                    case "Big" -> 10.0;
+                    default -> affinityBetweenStations;
+                };
             } else if (s.getFunction().equals("Long")){
-                if(otherStation.getFunction().equals("Small")){
-                    affinityBetweenStations = -10.0;
-                } else if (otherStation.getFunction().equals("Wide")){
-                    affinityBetweenStations = 5.0;
-                } else if (otherStation.getFunction().equals("Long")){
-                    affinityBetweenStations = 10.0;
-                }else if (otherStation.getFunction().equals("Big")){
-                    affinityBetweenStations = 0.0;
-                }
+                affinityBetweenStations = switch (otherStation.getFunction()) {
+                    case "Small" -> -10.0;
+                    case "Wide" -> 5.0;
+                    case "Long" -> 10.0;
+                    case "Big" -> 0.0;
+                    default -> affinityBetweenStations;
+                };
             } else if (s.getFunction().equals("Big")){
-                if(otherStation.getFunction().equals("Small")){
-                    affinityBetweenStations = -10.0;
-                } else if (otherStation.getFunction().equals("Wide")){
-                    affinityBetweenStations = 10.0;
-                } else if (otherStation.getFunction().equals("Long")){
-                    affinityBetweenStations = 0.0;
-                }else if (otherStation.getFunction().equals("Big")){
-                    affinityBetweenStations = 5.0;
-                }
+                affinityBetweenStations = switch (otherStation.getFunction()) {
+                    case "Small" -> -10.0;
+                    case "Wide" -> 10.0;
+                    case "Long" -> 0.0;
+                    case "Big" -> 5.0;
+                    default -> affinityBetweenStations;
+                };
             }
             affinityResult = affinityBetweenStations * distance;
             totalIndividualAffinity += affinityResult;
@@ -208,7 +200,7 @@ public class FacilityFloorplan extends Thread {
         lock.lock();
         try {
             allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
-            floorPlanArray.add(floorplan); //use for crossovers and sorting
+            floorPlanArraylist.add(floorplan); //use for crossovers and sorting
             return floorplan;
         } finally {
             lock.unlock();
@@ -216,58 +208,165 @@ public class FacilityFloorplan extends Thread {
 
     }
 
-    public static Floorplan crossover(){
+
+    public static Floorplan crossover() {
+        ArrayList<Floorplan> fakeArrayList;
+        lock.lock();
+        try {
+            fakeArrayList = new ArrayList<>(floorPlanArraylist);
+        } finally {
+            lock.unlock();
+        }
         //  1: Get two random integers (idx1, idx2) bound by the size of the array of floor plans
-        int idx1 = ThreadLocalRandom.current().nextInt(0, (floorPlanArray.size()-1) );
-        int idx2 = ThreadLocalRandom.current().nextInt(0, (floorPlanArray.size()-1));
+        int idx1 = ThreadLocalRandom.current().nextInt(0, (fakeArrayList.size() - 1));
+        int idx2 = ThreadLocalRandom.current().nextInt(0, (fakeArrayList.size() - 1));
+
         //  2: Get the arrays of stations (sts1, sts2) of the two floor plans at idx1 and idx2 --> USE THE LOCK
-        Station[] sts1 = floorPlanArray.get(idx1).getStations();
-        Station[] sts2 = floorPlanArray.get(idx2).getStations();
+        Station[] sts1 = fakeArrayList.get(idx1).getStations();
+        Station[] sts2 = fakeArrayList.get(idx2).getStations();
+
         //  3: merge sts1 and sts2 --> make a new array of stations
-            //  4: get half of the stations in sts1 (indexes 0- 23) which will be all the small and long stations
         Station[] mergedStations = new Station[numberOfStations];
-        for (int i = 0; i <= ((sts1.length/2 -1)) ; i++){
+
+        //  4: get half of the stations in sts1 (indexes 0-23) which will be all the small and long stations
+        for (int i = 0; i <= ((sts1.length / 2 - 1)); i++) {
             mergedStations[i] = sts1[i];
         }
-            //  5: get half of the stations in sts2 (indexes 24 - 47) which will be all the wide and big stations
-        for (int p = (sts2.length/2); p <= ((sts2.length)-1) ; p++){
+
+        //  5: get half of the stations in sts2 (indexes 24 - 47) which will be all the wide and big stations
+        for (int p = (sts2.length / 2); p <= ((sts2.length) - 1); p++) {
             mergedStations[p] = sts2[p];
         }
-        //  6: Make sure the stations don't overlap --> if they overlap move them so that they dont.
+
+        //  6: Make sure the stations don't overlap --> if they overlap, move them so that they don't
+        adjustOverlap(mergedStations);
+
         //  7: calculate new affinity
         double affinity = calculateFPAffinity(mergedStations);
+
         //  8: make new floor plan
-        Floorplan floorplan = new Floorplan(mergedStations,affinity);
+        Floorplan floorplan = new Floorplan(mergedStations, affinity);
+
         //  9: set the stations for the new floor plan
         floorplan.setStations(mergedStations);
+
         // 10: set the affinity for the new floor plan
         floorplan.setFloorPlanAffinity(affinity);
+
         // 11: Add the new floor plan to the Hashmap and the array of floor plans
         lock.lock();
         try {
             allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
-            floorPlanArray.add(floorplan); //use for crossovers and sorting
+            floorPlanArraylist.add(floorplan); // use for crossovers and sorting
+
             // 12: return the new floor plan
+            System.out.println("Crossover test pass");
             return floorplan;
         } finally {
             lock.unlock();
         }
     }
 
+    /**
+     * Adjusts the positions of stations in the merged array to ensure there are no overlaps.
+     */
+    public static void adjustOverlap(Station[] mergedStations) {
+        for (int i = 0; i < mergedStations.length; i++) {
+            Station stationA = mergedStations[i];
+
+            for (int j = i + 1; j < mergedStations.length; j++) {
+                Station stationB = mergedStations[j];
+
+                // Check if stationA and stationB overlap
+                if (crossoverIsOverlapping(stationA, stationB)) {
+                    // Move stationB to a new non-overlapping position
+                    moveStation(stationB, mergedStations);
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if two stations overlap based on their x, y coordinates and size.
+     */
+    public static boolean crossoverIsOverlapping(Station a, Station b) {
+        // Bounding box for station a
+        int aXMin = a.getxCoordinate();
+        int aXMax = a.getxCoordinate() + a.getWidth();
+        int aYMin = a.getyCoordinate();
+        int aYMax = a.getyCoordinate() + a.getHeight();
+
+        // Bounding box for station b
+        int bXMin = b.getxCoordinate();
+        int bXMax = b.getxCoordinate() + b.getWidth();
+        int bYMin = b.getyCoordinate();
+        int bYMax = b.getyCoordinate() + b.getHeight();
+
+        // Check if their bounding boxes overlap
+        return (aXMin < bXMax && aXMax > bXMin) && (aYMin < bYMax && aYMax > bYMin);
+    }
+
+    /**
+     * Moves the station to a nearby position that doesn't overlap with any other stations.
+     */
+    public static void moveStation(Station station, Station[] mergedStations) {
+        boolean placed = false;
+
+        while (!placed) {
+            // Generate a new random position for the station
+            int newX = ThreadLocalRandom.current().nextInt(1, 33) * stationScale;
+            int newY = ThreadLocalRandom.current().nextInt(1, 33) * stationScale;
+
+            // Make sure the new position keeps the station within the grid boundaries
+            newX = Math.min(newX, (32 * stationScale) - station.getWidth());  // Ensure the station doesn't go beyond the right edge
+            newY = Math.min(newY, (32 * stationScale) - station.getHeight()); // Ensure the station doesn't go beyond the bottom edge
+
+            station.setxCoordinate(newX);
+            station.setyCoordinate(newY);
+
+            // Check again if this new position overlaps with any other station
+            placed = true; // Assume placement is successful
+            for (Station otherStation : mergedStations) {
+                if (otherStation != station && crossoverIsOverlapping(station, otherStation)) {
+                    placed = false; // Overlap detected, try again
+                    break;
+                }
+            }
+        }
+    }
+
+
+    /**
+     * TODO: Test crossOver
+     */
+    public static Floorplan testCrossover(){
+        Floorplan floorplan1 = createFloorplan();
+        Floorplan floorplan2 = createFloorplan();
+        Floorplan floorplan3 = createFloorplan();
+        Floorplan floorplan4 = createFloorplan();
+        Floorplan floorplan5 = crossover();
+        return floorplan5;
+    }
     public static Floorplan createFloorplan() {
         Floorplan floorplan;
-        if (floorPlanArray.size() > 5) {
-            int random = ThreadLocalRandom.current().nextInt(1, (floorPlanArray.size() - 1));
-            System.out.println("Random int: " + random);
+        ArrayList<Floorplan> fakeArrayList;
+        lock.lock();
+        try {
+            fakeArrayList = new ArrayList<>(floorPlanArraylist);
+        } finally {
+            lock.unlock();
+        }
+        if (fakeArrayList.size() > 5) {
+            int random = ThreadLocalRandom.current().nextInt(1, (fakeArrayList.size() - 1));
             if (random % 2 == 0) {
-                System.out.println("Crossover");
+                System.out.println("\nCrossover");
                 floorplan = crossover();
             } else {
-                System.out.println("Mutation");
+                System.out.println("\nMutation");
                 floorplan = mutation();
             }
         } else{
-            System.out.println("Mutation");
+            System.out.println("\nMutation");
             floorplan = mutation();
         }
         return floorplan;
@@ -275,8 +374,27 @@ public class FacilityFloorplan extends Thread {
 
 
     //go through arrayList and find the one with the highest affinity value
-    public static Floorplan pickBestOne(ArrayList<Floorplan> floorPlanArray){
-        Floorplan bestFloorplan= createFloorplan();
+    public static Floorplan pickBestFloorPlan(){
+        double bestAffinity= 0.0;
+        ArrayList<Floorplan> fakeArrayList;
+        lock.lock();
+        try {
+            fakeArrayList = new ArrayList<>(floorPlanArraylist);
+        } finally {
+            lock.unlock();
+        }
+        for (Floorplan floorplan : fakeArrayList) {
+            if (bestAffinity < floorplan.getFloorPlanAffinity()) {
+                bestAffinity = floorplan.getFloorPlanAffinity();
+            }
+        }
+        Floorplan bestFloorplan;
+        lock.lock();
+        try{
+            bestFloorplan = allFloorPlans.get(bestAffinity);
+        } finally {
+            lock.unlock();
+        }
         return bestFloorplan;
     }
 
@@ -340,15 +458,15 @@ public class FacilityFloorplan extends Thread {
 //        floorPlanArray.add(floorplan);
 //        System.out.println(floorPlanArray.size());
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 15; i++) {
             createFloorplan();
         }
 
 
         System.out.println("hashmap size: " + allFloorPlans.size());
         System.out.println("Hashmap keys: " + allFloorPlans.keySet());
-
-        System.out.println("array size: " + floorPlanArray.size());
+        System.out.println("Best affinity: " + pickBestFloorPlan().getFloorPlanAffinity());
+        System.out.println("array size: " + floorPlanArraylist.size());
 //        for (int i = 0; i < floorPlanArray.size(); i++) {
 //            System.out.println(floorPlanArray.get(i).getFloorPlanAffinity());
 //            for (int p = 0; p < (floorPlanArray.get(i).getStations().length); p++) {
