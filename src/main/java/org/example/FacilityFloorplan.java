@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -18,9 +19,6 @@ public class FacilityFloorplan extends Thread {
     static HashMap<Double, Floorplan> allFloorPlans = new HashMap<>();
     static ArrayList<Floorplan> floorPlanArraylist = new ArrayList<>();  //used for crossovers
 
-
-
-
     // ---=== STEP 1: Create  stations ===---
     public static Station[] createStations() {
         Station[] stationsArray = new Station[numberOfStations];
@@ -31,7 +29,10 @@ public class FacilityFloorplan extends Thread {
         String stationFunction = "Small";
         for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
             Station s = new Station(stationFunction, stationScale, stationScale, stationIDCounter);
-            s.setFunction(stationFunction); s.setId(stationIDCounter); s.setHeight(stationScale); s.setWidth(stationScale);
+            s.setFunction(stationFunction);
+            s.setId(stationIDCounter);
+            s.setHeight(stationScale);
+            s.setWidth(stationScale);
             setXYCoordinates(s, stationsArray, stationIDCounter);
             stationsArray[stationIDCounter] = s;
             stationIDCounter++;
@@ -41,7 +42,10 @@ public class FacilityFloorplan extends Thread {
         stationFunction = "Long";
         for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
             Station s = new Station(stationFunction, stationScale, stationScale * 2, stationIDCounter);
-            s.setFunction(stationFunction); s.setId(stationIDCounter); s.setHeight(stationScale * 2); s.setWidth(stationScale);
+            s.setFunction(stationFunction);
+            s.setId(stationIDCounter);
+            s.setHeight(stationScale * 2);
+            s.setWidth(stationScale);
             setXYCoordinates(s, stationsArray, stationIDCounter);
             stationsArray[stationIDCounter] = s;
             stationIDCounter++;
@@ -51,7 +55,10 @@ public class FacilityFloorplan extends Thread {
         stationFunction = "Wide";
         for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
             Station s = new Station(stationFunction, stationScale * 2, stationScale, stationIDCounter);
-            s.setFunction(stationFunction); s.setId(stationIDCounter); s.setHeight(stationScale); s.setWidth(stationScale * 2);
+            s.setFunction(stationFunction);
+            s.setId(stationIDCounter);
+            s.setHeight(stationScale);
+            s.setWidth(stationScale * 2);
             setXYCoordinates(s, stationsArray, stationIDCounter);
             stationsArray[stationIDCounter] = s;
             stationIDCounter++;
@@ -61,17 +68,21 @@ public class FacilityFloorplan extends Thread {
         stationFunction = "Big";
         for (int i = 0; i < (numberOfStations / typesOfStations); i++) {
             Station s = new Station(stationFunction, stationScale * 2, stationScale * 2, stationIDCounter);
-            s.setFunction(stationFunction); s.setId(stationIDCounter); s.setHeight(stationScale * 2); s.setWidth(stationScale * 2);
+            s.setFunction(stationFunction);
+            s.setId(stationIDCounter);
+            s.setHeight(stationScale * 2);
+            s.setWidth(stationScale * 2);
             setXYCoordinates(s, stationsArray, stationIDCounter);
             stationsArray[stationIDCounter] = s;
             stationIDCounter++;
         }
         return stationsArray;
     }
+
     public static void setXYCoordinates(Station s, Station[] stationsArray, int stationIDCounter) {
         while ((s.getxCoordinate() == 0) && (s.getyCoordinate() == 0)) {
             int randomXInt = ThreadLocalRandom.current().nextInt(1, (gridSize + 1));
-            int randomYInt = ThreadLocalRandom.current().nextInt(1, (gridSize+1));
+            int randomYInt = ThreadLocalRandom.current().nextInt(1, (gridSize + 1));
             int tryX = randomXInt * stationScale;
             int tryY = randomYInt * stationScale;
 
@@ -87,10 +98,10 @@ public class FacilityFloorplan extends Thread {
     }
 
     /**
-   Helper methods for createStations
-       Makes sure stations do not overlap when being placed into the floorplan before setting
-       their x and y coordinates
-    */
+     * Helper methods for createStations
+     * Makes sure stations do not overlap when being placed into the floorplan before setting
+     * their x and y coordinates
+     */
     public static boolean isOverlapping(int x, int y, int width, int height, Station[] stationsArray, int stationIDCounter) {
         // Calculate the bounding box for the new station, with padding (1-unit radius)
         int newXMin = x - stationScale;
@@ -120,26 +131,26 @@ public class FacilityFloorplan extends Thread {
         return false;  // No overlap
     }
 
-    public static double calculateFPAffinity (Station[] stations ){
+    public static double calculateFPAffinity(Station[] stations) {
         double totalFPAffinity = 0;
-        for (Station s :  stations){
+        for (Station s : stations) {
             totalFPAffinity += stationAffinity(s, stations);
         }
         return totalFPAffinity;
     }
 
     /**
-    Helper methods for the calculateFPAffinity() method
-        Calculates the affinity total from one specific stations to all the other stations in the floor plan
+     * Helper methods for the calculateFPAffinity() method
+     * Calculates the affinity total from one specific stations to all the other stations in the floor plan
      */
-    public static double stationAffinity(Station s, Station[] stations){
+    public static double stationAffinity(Station s, Station[] stations) {
         double totalIndividualAffinity = 0;
         //go through the array and calculate the affinity of the station s to the other stations in the array.
         int sX = s.getxCoordinate();
         int sY = s.getyCoordinate();
         int otherX;
         int otherY;
-        for (Station otherStation : stations){
+        for (Station otherStation : stations) {
             otherX = otherStation.getxCoordinate();
             otherY = otherStation.getyCoordinate();
             double affinityBetweenStations = 0;
@@ -149,7 +160,7 @@ public class FacilityFloorplan extends Thread {
             double sum = xSquaredDifference + ySquaredDifference;
             double distance = Math.sqrt(sum);
             //determine the affinity between the two stations
-            if (s.getFunction().equals("Small")){
+            if (s.getFunction().equals("Small")) {
                 affinityBetweenStations = switch (otherStation.getFunction()) {
                     case "Small" -> 10.0;
                     case "Wide" -> -10.0;
@@ -157,7 +168,7 @@ public class FacilityFloorplan extends Thread {
                     case "Big" -> -10.0;
                     default -> affinityBetweenStations;
                 };
-            } else if (s.getFunction().equals("Wide")){
+            } else if (s.getFunction().equals("Wide")) {
                 affinityBetweenStations = switch (otherStation.getFunction()) {
                     case "Small" -> -10.0;
                     case "Wide" -> 10.0;
@@ -165,7 +176,7 @@ public class FacilityFloorplan extends Thread {
                     case "Big" -> 10.0;
                     default -> affinityBetweenStations;
                 };
-            } else if (s.getFunction().equals("Long")){
+            } else if (s.getFunction().equals("Long")) {
                 affinityBetweenStations = switch (otherStation.getFunction()) {
                     case "Small" -> -10.0;
                     case "Wide" -> 5.0;
@@ -173,7 +184,7 @@ public class FacilityFloorplan extends Thread {
                     case "Big" -> 0.0;
                     default -> affinityBetweenStations;
                 };
-            } else if (s.getFunction().equals("Big")){
+            } else if (s.getFunction().equals("Big")) {
                 affinityBetweenStations = switch (otherStation.getFunction()) {
                     case "Small" -> -10.0;
                     case "Wide" -> 10.0;
@@ -189,10 +200,10 @@ public class FacilityFloorplan extends Thread {
         return totalIndividualAffinity;
     }
 
-    public static Floorplan mutation(){
+    public static Floorplan mutation() {
         Station[] sts = createStations();
         double affinity = calculateFPAffinity(sts);
-        Floorplan floorplan = new Floorplan(sts,affinity);
+        Floorplan floorplan = new Floorplan(sts, affinity);
         floorplan.setStations(sts);
         floorplan.setFloorPlanAffinity(affinity);
 
@@ -260,7 +271,6 @@ public class FacilityFloorplan extends Thread {
             floorPlanArraylist.add(floorplan); // use for crossovers and sorting
 
             // 12: return the new floor plan
-            System.out.println("Crossover test pass");
             return floorplan;
         } finally {
             lock.unlock();
@@ -335,18 +345,6 @@ public class FacilityFloorplan extends Thread {
         }
     }
 
-
-    /**
-     * TODO: Test crossOver
-     */
-    public static Floorplan testCrossover(){
-        Floorplan floorplan1 = createFloorplan();
-        Floorplan floorplan2 = createFloorplan();
-        Floorplan floorplan3 = createFloorplan();
-        Floorplan floorplan4 = createFloorplan();
-        Floorplan floorplan5 = crossover();
-        return floorplan5;
-    }
     public static Floorplan createFloorplan() {
         Floorplan floorplan;
         ArrayList<Floorplan> fakeArrayList;
@@ -365,7 +363,7 @@ public class FacilityFloorplan extends Thread {
                 System.out.println("\nMutation");
                 floorplan = mutation();
             }
-        } else{
+        } else {
             System.out.println("\nMutation");
             floorplan = mutation();
         }
@@ -374,8 +372,8 @@ public class FacilityFloorplan extends Thread {
 
 
     //go through arrayList and find the one with the highest affinity value
-    public static Floorplan pickBestFloorPlan(){
-        double bestAffinity= 0.0;
+    public static Floorplan pickBestFloorPlan() {
+        double bestAffinity = 0.0;
         ArrayList<Floorplan> fakeArrayList;
         lock.lock();
         try {
@@ -390,7 +388,7 @@ public class FacilityFloorplan extends Thread {
         }
         Floorplan bestFloorplan;
         lock.lock();
-        try{
+        try {
             bestFloorplan = allFloorPlans.get(bestAffinity);
         } finally {
             lock.unlock();
@@ -398,16 +396,22 @@ public class FacilityFloorplan extends Thread {
         return bestFloorplan;
     }
 
-
+    public ArrayList<Floorplan> getFloorPlanArraylist() {
+        ArrayList<Floorplan> fakeArrayList;
+        lock.lock();
+        try {
+            fakeArrayList = new ArrayList<>(floorPlanArraylist);
+        } finally {
+            lock.unlock();
+        }
+        return fakeArrayList;
+    }
 
     // ---=== STEP 2: Create 4 threads ===---
     public static Thread threadOne = new Thread();
     public static Thread threadTwo = new Thread();
     public static Thread threadThree = new Thread();
     public static Thread threadFour = new Thread();
-
-
-
 
 
     @Override
@@ -435,44 +439,24 @@ public class FacilityFloorplan extends Thread {
         super.run();
     }
 
-    public static void main(String[] args) {
-        //Start threads
-//        threadOne.start();
-//        threadTwo.start();
-//        threadThree.start();
-//        threadFour.start();
-        Station[] stations1 = createStations();
-//        for (Station s : stations1){
-//            System.out.println("\nStation: " + s.getId() +
-//                    "\nStation function: " + s.getFunction() +
-//                    "\nStation width: " + s.getWidth() +
-//                    "\nStation Height: " + s.getHeight() +
-//                    "\nStation xCor: " + s.getxCoordinate() +
-//                    "\nStation yCor: " + s.getyCoordinate() + "\n");
-//        }
-//        System.out.println(calculateFPAffinity(stations1));
-//        double affinity = calculateFPAffinity(stations1);
-//        Floorplan floorplan = new Floorplan(stations1, affinity);
-//        allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
-//
-//        floorPlanArray.add(floorplan);
-//        System.out.println(floorPlanArray.size());
 
-        for (int i = 0; i < 15; i++) {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Facilities Layout");
+
+        for (int i = 0; i < 50; i++) {
             createFloorplan();
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(850, 900);
+            frame.add(new GUI());
+            frame.setVisible(true);
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
-
-        System.out.println("hashmap size: " + allFloorPlans.size());
-        System.out.println("Hashmap keys: " + allFloorPlans.keySet());
-        System.out.println("Best affinity: " + pickBestFloorPlan().getFloorPlanAffinity());
-        System.out.println("array size: " + floorPlanArraylist.size());
-//        for (int i = 0; i < floorPlanArray.size(); i++) {
-//            System.out.println(floorPlanArray.get(i).getFloorPlanAffinity());
-//            for (int p = 0; p < (floorPlanArray.get(i).getStations().length); p++) {
-//                System.out.println(p + ": " + (floorPlanArray.get(i).getStations()[p].getFunction()));
-//            }
-//        }
+        System.out.println("DONE =)");
 
     }
 }

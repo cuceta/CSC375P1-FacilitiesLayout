@@ -1,6 +1,7 @@
 package org.example;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class GUI extends JPanel {
 
@@ -25,8 +26,10 @@ public class GUI extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
 
 //        for (int p =0; p< 10; p++) {
-            Floorplan floorplan = FacilityFloorplan.testCrossover();
-            for (Station s : floorplan.getStations()) {
+            Floorplan floorplan = FacilityFloorplan.pickBestFloorPlan();
+//        Floorplan floorplan = FacilityFloorplan.createFloorplan();
+
+        for (Station s : floorplan.getStations()) {
                 if (s.getFunction().equals("Small")) {
                     g2.setColor(Color.CYAN);
                 } else if (s.getFunction().equals("Big")) {
@@ -38,7 +41,7 @@ public class GUI extends JPanel {
                 }
                 g2.fillRect(s.getxCoordinate(), s.getyCoordinate(), s.getWidth(), s.getHeight());
                 g2.setColor(Color.BLACK);
-                g2.setStroke(new BasicStroke(4));
+                g2.setStroke(new BasicStroke(3));
                 g2.drawRect(s.getxCoordinate(), s.getyCoordinate(), s.getWidth(), s.getHeight());
 
             }
