@@ -1,7 +1,6 @@
 package org.example;
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 
 public class GUI extends JPanel {
 
@@ -25,9 +24,8 @@ public class GUI extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
-//        for (int p =0; p< 10; p++) {
-            Floorplan floorplan = FacilityFloorplan.pickBestFloorPlan();
-//        Floorplan floorplan = FacilityFloorplan.createFloorplan();
+        Floorplan floorplan = FacilityFloorPlan.pickBestFloorPlan();
+//        Floorplan floorplan = FacilityFloorPlan.createFloorplan();
 
         for (Station s : floorplan.getStations()) {
                 if (s.getFunction().equals("Small")) {
@@ -45,8 +43,7 @@ public class GUI extends JPanel {
                 g2.drawRect(s.getxCoordinate(), s.getyCoordinate(), s.getWidth(), s.getHeight());
 
             }
-            System.out.println(floorplan.getFloorPlanAffinity());
-//        }
+//            System.out.println(floorplan.getFloorPlanAffinity());
     }
 
     public static void main(String[] args) {

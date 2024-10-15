@@ -7,7 +7,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class FacilityFloorplan extends Thread {
+public class FacilityFloorPlan extends Thread {
 
     static final int numberOfStations = 48;//Always a multiple of 4
     static final int typesOfStations = 4;
@@ -18,6 +18,8 @@ public class FacilityFloorplan extends Thread {
     //Always lock these before using
     static HashMap<Double, Floorplan> allFloorPlans = new HashMap<>();
     static ArrayList<Floorplan> floorPlanArraylist = new ArrayList<>();  //used for crossovers
+    static JFrame frame = new JFrame("Facilities Layout");
+
 
     // ---=== STEP 1: Create  stations ===---
     public static Station[] createStations() {
@@ -349,7 +351,7 @@ public class FacilityFloorplan extends Thread {
     public static Floorplan createFloorplan() {
         Floorplan floorplan;
         ArrayList<Floorplan> fakeArrayList;
-        lock.lock();
+        lock.lock(); // Locking to safely access shared resources
         try {
             fakeArrayList = new ArrayList<>(floorPlanArraylist);
         } finally {
@@ -371,8 +373,10 @@ public class FacilityFloorplan extends Thread {
         return floorplan;
     }
 
-
-    //go through arrayList and find the one with the highest affinity value
+    /**
+     * FOR GUI
+     * Go through arrayList and find the one with the highest affinity value
+     */
     public static Floorplan pickBestFloorPlan() {
         double bestAffinity = 0.0;
         ArrayList<Floorplan> fakeArrayList;
@@ -383,7 +387,7 @@ public class FacilityFloorplan extends Thread {
             lock.unlock();
         }
         for (Floorplan floorplan : fakeArrayList) {
-            if (bestAffinity < floorplan.getFloorPlanAffinity()) {
+            if (bestAffinity <= floorplan.getFloorPlanAffinity()) {
                 bestAffinity = floorplan.getFloorPlanAffinity();
             }
         }
@@ -397,67 +401,55 @@ public class FacilityFloorplan extends Thread {
         return bestFloorplan;
     }
 
-    public ArrayList<Floorplan> getFloorPlanArraylist() {
-        ArrayList<Floorplan> fakeArrayList;
-        lock.lock();
-        try {
-            fakeArrayList = new ArrayList<>(floorPlanArraylist);
-        } finally {
-            lock.unlock();
-        }
-        return fakeArrayList;
-    }
-
-    // ---=== STEP 2: Create 4 threads ===---
-    public static Thread threadOne = new Thread();
-    public static Thread threadTwo = new Thread();
-    public static Thread threadThree = new Thread();
-    public static Thread threadFour = new Thread();
-
-
     @Override
     public void run() {
-
-        //in here Put what I want each thread to do
-        // - Thread independent
-
-        // ====== INSIDE EACH OF EACH OF THE THREADS ======
-
-        // ---=== STEP 3: Give each thread a defensive copy of the stations ===---
-
-
-        // ---=== STEP 4: Create floor plans ===---
-
-        // ---=== OPTION 1: Produce a floorplan with random placements of stations ===---
-
-        // ---=== OPTION 2.1: Copy half of an existing floor plan ===---
-
-        // ---=== OPTION 2.2: Create other half of the floor plan ===---
-
-
-        // ---=== STEP 5: Calculate Affinity total score and add it to the global poll of solutions ===---
-
-        super.run();
-    }
-
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Facilities Layout");
-
-        for (int i = 0; i < 50; i++) {
-            createFloorplan();
+        for (int i = 0; i < 20; i++) {
+            Floorplan newFloorplan = createFloorplan();
+            System.out.println("Thread: " + Thread.currentThread().getName() + " created a new floorplan with affinity: " + newFloorplan.getFloorPlanAffinity());
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setSize(850, 900);
             frame.add(new GUI());
             frame.setVisible(true);
+            // Simulate some delay to see interleaving threads in action
             try {
-                Thread.sleep(500);
+                Thread.sleep(ThreadLocalRandom.current().nextInt(300, 500));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
 
-        System.out.println("\nDONE =)");
+    public static void main(String[] args) {
 
+        //  1: Create threads
+        FacilityFloorPlan threadOne = new FacilityFloorPlan();
+        FacilityFloorPlan threadTwo = new FacilityFloorPlan();
+        FacilityFloorPlan threadThree = new FacilityFloorPlan();
+        FacilityFloorPlan threadFour = new FacilityFloorPlan();
+        FacilityFloorPlan threadFive = new FacilityFloorPlan();
+
+        //  2: Start the threads
+        threadOne.start();
+        threadTwo.start();
+        threadThree.start();
+        threadFour.start();
+        threadFive.start();
+
+        //  3: Wait for all threads to complete
+        try {
+            threadOne.join();
+            threadTwo.join();
+            threadThree.join();
+            threadFour.join();
+            threadFive.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // 4: Display final results
+        System.out.println("\n\nAll threads completed. Best floor plan affinity: " + pickBestFloorPlan().getFloorPlanAffinity());
+
+        // 5: Terminate program
+        frame.dispose();
     }
 }
