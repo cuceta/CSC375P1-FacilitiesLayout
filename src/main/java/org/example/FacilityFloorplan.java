@@ -206,7 +206,7 @@ public class FacilityFloorplan extends Thread {
         Floorplan floorplan = new Floorplan(sts, affinity);
         floorplan.setStations(sts);
         floorplan.setFloorPlanAffinity(affinity);
-
+        System.out.println("Floor plan affinity: " + affinity);
         //ADD LOCKS HERE
         lock.lock();
         try {
@@ -263,6 +263,7 @@ public class FacilityFloorplan extends Thread {
 
         // 10: set the affinity for the new floor plan
         floorplan.setFloorPlanAffinity(affinity);
+        System.out.println("Floor plan affinity: " + affinity);
 
         // 11: Add the new floor plan to the Hashmap and the array of floor plans
         lock.lock();
@@ -456,7 +457,7 @@ public class FacilityFloorplan extends Thread {
             }
         }
 
-        System.out.println("DONE =)");
+        System.out.println("\nDONE =)");
 
     }
 }
