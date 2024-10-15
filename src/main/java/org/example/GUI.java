@@ -24,9 +24,7 @@ public class GUI extends JPanel {
 
         Graphics2D g2 = (Graphics2D) g;
 
-        Floorplan floorplan = FacilityFloorPlan.pickBestFloorPlan();
-//        Floorplan floorplan = FacilityFloorPlan.createFloorplan();
-
+        FloorPlan floorplan = FacilityFloorPlanGenerator.pickBestFloorPlan();
         for (Station s : floorplan.getStations()) {
                 if (s.getFunction().equals("Small")) {
                     g2.setColor(Color.CYAN);
@@ -43,7 +41,6 @@ public class GUI extends JPanel {
                 g2.drawRect(s.getxCoordinate(), s.getyCoordinate(), s.getWidth(), s.getHeight());
 
             }
-//            System.out.println(floorplan.getFloorPlanAffinity());
     }
 
     public static void main(String[] args) {

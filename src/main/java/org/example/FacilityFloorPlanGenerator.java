@@ -1,13 +1,14 @@
 package org.example;
 
 import javax.swing.*;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-public class FacilityFloorPlan extends Thread {
+public class FacilityFloorPlanGenerator extends Thread {
 
     static final int numberOfStations = 48;//Always a multiple of 4
     static final int typesOfStations = 4;
@@ -16,8 +17,8 @@ public class FacilityFloorPlan extends Thread {
     static final ReentrantLock lock = new ReentrantLock();
 
     //Always lock these before using
-    static HashMap<Double, Floorplan> allFloorPlans = new HashMap<>();
-    static ArrayList<Floorplan> floorPlanArraylist = new ArrayList<>();  //used for crossovers
+    static HashMap<Double, FloorPlan> allFloorPlans = new HashMap<>();
+    static ArrayList<FloorPlan> floorPlanArraylist = new ArrayList<>();  //used for crossovers
     static JFrame frame = new JFrame("Facilities Layout");
 
 
@@ -101,7 +102,7 @@ public class FacilityFloorPlan extends Thread {
 
     /**
      * Helper methods for createStations
-     * Makes sure stations do not overlap when being placed into the floorplan before setting
+     * Makes sure stations do not overlap when being placed into the floor plan before setting
      * their x and y coordinates
      */
     public static boolean isOverlapping(int x, int y, int width, int height, Station[] stationsArray, int stationIDCounter) {
@@ -202,14 +203,19 @@ public class FacilityFloorPlan extends Thread {
         return totalIndividualAffinity;
     }
 
-    public static Floorplan mutation() {
+    /**
+     * Create a completely new floor plan
+     */
+    public static FloorPlan mutation() {
+        //Create stations and calculate their affinity
         Station[] sts = createStations();
         double affinity = calculateFPAffinity(sts);
-        Floorplan floorplan = new Floorplan(sts, affinity);
+        //Make new floor plan
+        FloorPlan floorplan = new FloorPlan(sts, affinity);
         floorplan.setStations(sts);
         floorplan.setFloorPlanAffinity(affinity);
         System.out.println("Floor plan affinity: " + affinity);
-        //ADD LOCKS HERE
+        //Add the floor plan to the arraylist and hashmap --> USE LOCKS
         lock.lock();
         try {
             allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
@@ -221,9 +227,11 @@ public class FacilityFloorPlan extends Thread {
 
     }
 
-
-    public static Floorplan crossover() {
-        ArrayList<Floorplan> fakeArrayList;
+    /**
+     * Pick two random floor plans from the array list and take half of each then merge them (move things if need be)
+     */
+    public static FloorPlan crossover() {
+        ArrayList<FloorPlan> fakeArrayList;
         lock.lock();
         try {
             fakeArrayList = new ArrayList<>(floorPlanArraylist);
@@ -258,7 +266,7 @@ public class FacilityFloorPlan extends Thread {
         double affinity = calculateFPAffinity(mergedStations);
 
         //  8: make new floor plan
-        Floorplan floorplan = new Floorplan(mergedStations, affinity);
+        FloorPlan floorplan = new FloorPlan(mergedStations, affinity);
 
         //  9: set the stations for the new floor plan
         floorplan.setStations(mergedStations);
@@ -267,12 +275,11 @@ public class FacilityFloorPlan extends Thread {
         floorplan.setFloorPlanAffinity(affinity);
         System.out.println("Floor plan affinity: " + affinity);
 
-        // 11: Add the new floor plan to the Hashmap and the array of floor plans
+        // 11: Add the new floor plan to the Hashmap and the array of floor plans --> USE LOCKS
         lock.lock();
         try {
             allFloorPlans.put(floorplan.getFloorPlanAffinity(), floorplan);
             floorPlanArraylist.add(floorplan); // use for crossovers and sorting
-
             // 12: return the new floor plan
             return floorplan;
         } finally {
@@ -348,15 +355,27 @@ public class FacilityFloorPlan extends Thread {
         }
     }
 
-    public static Floorplan createFloorplan() {
-        Floorplan floorplan;
-        ArrayList<Floorplan> fakeArrayList;
+    /**
+     * Choose either mutation or cross over approach in a controlled "random" way.
+     */
+    public static FloorPlan createFloorplan() {
+        FloorPlan floorplan;
+        ArrayList<FloorPlan> fakeArrayList;
         lock.lock(); // Locking to safely access shared resources
         try {
             fakeArrayList = new ArrayList<>(floorPlanArraylist);
         } finally {
             lock.unlock();
         }
+        /*
+         * CHOOSE EITHER MUTATION OR CROSSOVER
+         * If MORE than 5 floor plans have been created
+         *  - Generate a thread local random number
+         *      - If the random is EVEN do cross over
+         *      - If the random is ODD do mutation
+         * If LESS than 5 floor plans have been created
+         *  - do mutation
+         */
         if (fakeArrayList.size() > 5) {
             int random = ThreadLocalRandom.current().nextInt(1, (fakeArrayList.size() - 1));
             if (random % 2 == 0) {
@@ -377,21 +396,21 @@ public class FacilityFloorPlan extends Thread {
      * FOR GUI
      * Go through arrayList and find the one with the highest affinity value
      */
-    public static Floorplan pickBestFloorPlan() {
+    public static FloorPlan pickBestFloorPlan() {
         double bestAffinity = 0.0;
-        ArrayList<Floorplan> fakeArrayList;
+        ArrayList<FloorPlan> fakeArrayList; //Defensive copy
         lock.lock();
         try {
             fakeArrayList = new ArrayList<>(floorPlanArraylist);
         } finally {
             lock.unlock();
         }
-        for (Floorplan floorplan : fakeArrayList) {
+        for (FloorPlan floorplan : fakeArrayList) {
             if (bestAffinity <= floorplan.getFloorPlanAffinity()) {
                 bestAffinity = floorplan.getFloorPlanAffinity();
             }
         }
-        Floorplan bestFloorplan;
+        FloorPlan bestFloorplan;
         lock.lock();
         try {
             bestFloorplan = allFloorPlans.get(bestAffinity);
@@ -401,16 +420,22 @@ public class FacilityFloorPlan extends Thread {
         return bestFloorplan;
     }
 
+    /**
+     * Tells each thread what to do
+     */
     @Override
     public void run() {
-        for (int i = 0; i < 20; i++) {
-            Floorplan newFloorplan = createFloorplan();
+        //Set up gui display
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(850, 900);
+        // Each thread makes 30 floor plans
+        for (int i = 0; i < 30; i++) {
+            FloorPlan newFloorplan = createFloorplan();
             System.out.println("Thread: " + Thread.currentThread().getName() + " created a new floorplan with affinity: " + newFloorplan.getFloorPlanAffinity());
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(850, 900);
+            // Call on GUI to display whatever the best pick is
             frame.add(new GUI());
             frame.setVisible(true);
-            // Simulate some delay to see interleaving threads in action
+            // Simulate some delay so that threads don't step on each other
             try {
                 Thread.sleep(ThreadLocalRandom.current().nextInt(300, 500));
             } catch (InterruptedException e) {
@@ -422,11 +447,11 @@ public class FacilityFloorPlan extends Thread {
     public static void main(String[] args) {
 
         //  1: Create threads
-        FacilityFloorPlan threadOne = new FacilityFloorPlan();
-        FacilityFloorPlan threadTwo = new FacilityFloorPlan();
-        FacilityFloorPlan threadThree = new FacilityFloorPlan();
-        FacilityFloorPlan threadFour = new FacilityFloorPlan();
-        FacilityFloorPlan threadFive = new FacilityFloorPlan();
+        FacilityFloorPlanGenerator threadOne = new FacilityFloorPlanGenerator();
+        FacilityFloorPlanGenerator threadTwo = new FacilityFloorPlanGenerator();
+        FacilityFloorPlanGenerator threadThree = new FacilityFloorPlanGenerator();
+        FacilityFloorPlanGenerator threadFour = new FacilityFloorPlanGenerator();
+        FacilityFloorPlanGenerator threadFive = new FacilityFloorPlanGenerator();
 
         //  2: Start the threads
         threadOne.start();
@@ -447,9 +472,16 @@ public class FacilityFloorPlan extends Thread {
         }
 
         // 4: Display final results
-        System.out.println("\n\nAll threads completed. Best floor plan affinity: " + pickBestFloorPlan().getFloorPlanAffinity());
+        System.out.println("\n\nNumber of Floor Plans created: " + floorPlanArraylist.size());
+        System.out.println("All threads completed. Best floor plan affinity: " + pickBestFloorPlan().getFloorPlanAffinity());
 
         // 5: Terminate program
+        try { //--> Makes it wait 5 seconds before disposing the frame
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         frame.dispose();
+        System.exit(0);
     }
 }

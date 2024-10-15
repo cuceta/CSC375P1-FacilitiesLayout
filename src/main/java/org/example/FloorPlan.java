@@ -1,10 +1,10 @@
 package org.example;
 
-public class Floorplan {
+public class FloorPlan {
     private double floorPlanAffinity;
     private Station[] stations;
 
-    public Floorplan(Station[] stations, double floorPlanAffinity) {
+    public FloorPlan(Station[] stations, double floorPlanAffinity) {
         this.floorPlanAffinity = floorPlanAffinity;
         this.stations = stations;
     }
