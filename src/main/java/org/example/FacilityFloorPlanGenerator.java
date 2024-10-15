@@ -424,7 +424,7 @@ public class FacilityFloorPlanGenerator extends Thread {
      * Tells each thread what to do
      */
     @Override
-    public void run() {
+    public void run(){
         //Set up gui display
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(850, 900);
